@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Stay at Stevens"/>
+  <title>Stay at Stevens</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:#1a1008;color:#e8dcc8;font-family:Georgia,serif;min-height:100vh;padding-bottom:80px}
+    input{font-family:Georgia,serif}
+    button{font-family:Georgia,serif;cursor:pointer}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const drinks = [
+  {spirit:"Tequila",name:"Espresso Martini",ingredients:["Espresso","Tequila (sub Vodka)","Coffee liqueur (Mr Black)","Simple syrup","Egg white"],recipe:["1.3 oz espresso","1.5 oz tequila (sub Vodka)","1.25 oz coffee liqueur (Mr Black)","0.5 oz simple syrup","Egg white"],glass:"Coupe"},
+  {spirit:"Tequila",name:"Bartaco Margarita",ingredients:["Tequila","Cointreau","Simple syrup","Lime"],recipe:["3 oz tequila","1.5 oz Cointreau","0.25 oz simple syrup","2 limes"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Pink Cadillac Margarita",ingredients:["Tequila","Cointreau (sub Grand Marnier)","Lime","Cranberry juice","OJ","Agave syrup","Chambord (optional)"],recipe:["2 oz tequila","1 oz Cointreau (sub Grand Marnier)","1.5 oz lime","1 oz cranberry juice","1 oz OJ","0.25 oz agave syrup","0.25 oz Chambord (optional)"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Paloma",ingredients:["Tequila (sub Mezcal)","Lime","Agave syrup","Grapefruit seltzer","Muddled jalapeño (optional)"],recipe:["2 oz tequila (sub Mezcal)","0.5 oz lime","0.25 oz agave syrup","Grapefruit seltzer to top","Muddled jalapeño (optional)"],glass:"Highball"},
+  {spirit:"Tequila",name:"Catch & Release",ingredients:["Tequila (Codigo)","Strega","Lavender","Simple syrup","Lemon","Lime","Egg white"],recipe:["2 oz tequila (Codigo)","0.25 oz Strega","0.25 oz lavender","0.25 oz simple syrup","0.25 oz lemon","0.5 oz lime","Egg white"],glass:"Coupe"},
+  {spirit:"Tequila",name:"Watermelon or Strawberry Margarita",ingredients:["Tequila","Cointreau","Lime","Simple syrup","Muddled strawberries","Pinch of salt"],recipe:["2 oz tequila","1 oz Cointreau","1 lime","0.25 oz simple syrup","4 muddled strawberries","Pinch of salt"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Peach Mezcal Margarita",ingredients:["Tequila blanco","Mezcal (espadín)","Lime","Cointreau","Peach purée or nectar","Agave syrup"],recipe:["1.5 oz tequila blanco","0.5 oz mezcal (espadín)","1.5 oz fresh lime juice","1 oz Cointreau","2 oz peach purée or nectar","0–0.25 oz agave syrup"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Desert Bird",ingredients:["Tequila blanco","Aperol","Allspice dram","Pineapple juice","Lime","Agave syrup"],recipe:["1.5 oz tequila blanco","0.75 oz Aperol","0.25 oz allspice dram","1.5 oz pineapple juice","0.75 oz lime juice","0–0.25 oz agave syrup"],glass:"Coupe"},
+  {spirit:"Bourbon",name:"Paper Plane",ingredients:["Bourbon (Maker's Mark)","Lemon","Amaro","Aperol"],recipe:["1.5 oz bourbon (Maker's Mark)","1.75 oz lemon","1.5 oz Amaro","1.5 oz Aperol"],glass:"Coupe"},
+  {spirit:"Bourbon",name:"Amaretto Sour",ingredients:["Amaretto","Bourbon","Lemon","Simple syrup","Egg white"],recipe:["1.5 oz Amaretto","0.75 oz bourbon","1 oz lemon","0.5 oz simple syrup","Egg white"],glass:"Rocks glass"},
+  {spirit:"Bourbon",name:"Whiskey Sour",ingredients:["Bourbon (Maker's Mark)","Lemon","Simple syrup","Egg white","Angostura bitters"],recipe:["3 oz bourbon (Maker's Mark)","1.5 oz lemon","0.75 oz simple syrup","Egg white","3 drops Angostura bitters"],glass:"Rocks glass"},
+  {spirit:"Bourbon",name:"Gold Rush",ingredients:["Bourbon (Maker's Mark)","Lemon","Honey","Egg white","Angostura bitters"],recipe:["3 oz bourbon (Maker's Mark)","1.5 oz lemon","0.75 oz honey","Egg white","3 drops Angostura bitters"],glass:"Rocks glass"},
+  {spirit:"Bourbon",name:"Bourbon Smash",ingredients:["Bourbon (Maker's Mark)","Lemon","Simple syrup","Cranberry juice"],recipe:["2.5 oz bourbon (Maker's Mark)","0.75 oz lemon","0.75 oz simple syrup","1.5 oz cranberry juice"],glass:"Rocks glass"},
+  {spirit:"Bourbon",name:"Old Fashioned",ingredients:["Bourbon","Jack Ruby syrup","Angostura bitters"],recipe:["1.25 oz bourbon","0.25 oz Jack Ruby syrup","3 drops Angostura bitters"],glass:"Rocks glass"},
+  {spirit:"Bourbon",name:"Tasty Jelly",ingredients:["Bourbon","Cointreau","Real grenadine","Lemon"],recipe:["1.5 oz bourbon","0.5 oz Cointreau","0.5 oz real grenadine","0.75 oz lemon juice"],glass:"Coupe"},
+
+  {spirit:"Gin",name:"Bee Sting",ingredients:["Gin","Honey syrup","Ginger juice","Lemon","Egg white (optional)"],recipe:["2 oz gin","0.75 oz honey syrup","0.5 oz fresh ginger juice","0.75 oz lemon juice","Egg white (optional)"],glass:"Coupe"},
+  {spirit:"Pisco",name:"Pisco Sour",ingredients:["Pisco","Lime (sub lemon)","Simple syrup","Egg white","Angostura bitters"],recipe:["2 oz Pisco","1 oz lime (sub lemon)","1 oz simple syrup","Egg white","3 drops Angostura bitters"],glass:"Coupe"},
+  {spirit:"Vodka",name:"Tiramisu Martini",ingredients:["Vanilla vodka","Fresh espresso","Dark crème de cacao","Simple syrup (optional)","Pinch of salt","Seasonal cold foam"],recipe:["2 oz vanilla vodka","1 oz fresh espresso","0.5 oz dark crème de cacao","0.25 oz simple syrup (optional)","Pinch of salt","Seasonal cold foam"],glass:"Coupe"},
+  {spirit:"Vodka",name:"Guinnesspresso Martini",ingredients:["Vodka","Fresh espresso","Coffee liqueur (Kahlúa or Mr Black)","Simple syrup (optional)","Guinness Draught","Pinch of salt"],recipe:["1.5 oz vodka","1 oz fresh espresso","0.75 oz coffee liqueur (Kahlúa or Mr Black)","0.25 oz simple syrup (optional)","1–2 oz Guinness Draught","Pinch of salt"],glass:"Coupe"},
+  {spirit:"Vodka",name:"Muppet Christmas Cosmo",ingredients:["Vodka","Cointreau","Pomegranate juice","Lime","Champagne (sub Rosé)","Pomegranate seeds"],recipe:["2 oz vodka","1.5 oz Cointreau","2 oz pomegranate juice","0.5 oz lime","4 oz champagne (sub Rosé)","Pomegranate seeds"],glass:"Coupe"},
+  {spirit:"Vodka",name:"Lemon Drop Spritz",ingredients:["Vodka","Lemon","Simple syrup","Prosecco","Lemon twist"],recipe:["1.5 oz vodka","1 oz lemon juice","0.5 oz simple syrup","Prosecco to top","Lemon twist"],glass:"Champagne flute"},
+  {spirit:"Champagne",name:"Rosé Mimosa",ingredients:["Sparkling Rosé (Josh)","Pom/cranberry juice"],recipe:["Sparkling Rosé (Josh)","Pom/cranberry juice to taste"],glass:"Champagne flute"},
+  {spirit:"Champagne",name:"Aperol Spritz",ingredients:["Prosecco","Aperol","Soda water","Orange slice"],recipe:["3 oz Prosecco","2 oz Aperol","1 oz soda water","Orange slice"],glass:"Wine glass"},
+  {spirit:"Tequila",name:"Baby Turtle",ingredients:["Reposado tequila","Lime","Grapefruit","Cinnamon syrup","Campari","Egg white","Salt solution"],recipe:["2 oz reposado tequila","0.75 oz lime","0.5 oz grapefruit","0.5 oz cinnamon syrup (2:1)","0.25 oz Campari","0.75 oz egg white","2 dashes salt solution"],glass:"Coupe"},
+  {spirit:"Tequila",name:"Aperol Tequila Sour",ingredients:["Tequila","Aperol","Strawberry syrup","Lemon","Egg white","Aromatic bitters"],recipe:["1.5 oz tequila","0.5 oz Aperol","0.5 oz strawberry syrup","0.75 oz lemon juice","1 egg white","Dashes of aromatic bitters"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Pineapple Aperol Tequila Sour",ingredients:["Tequila","Aperol","Pineapple juice","Lemon","Simple syrup","Egg white","Aromatic bitters"],recipe:["2 oz tequila","1 oz Aperol","1 oz pineapple juice","0.75 oz lemon juice","0.5–0.75 oz simple syrup","1 egg white (or 0.5 oz aquafaba)","Aromatic bitters"],glass:"Coupe"},
+  {spirit:"Bourbon",name:"Strawberry Grapefruit Bourbon Sour",ingredients:["Bourbon","Ruby red grapefruit juice","Lemon","Strawberry syrup","Egg white","Aromatic bitters"],recipe:["2 oz bourbon","1.5 oz ruby red grapefruit juice","0.75 oz lemon juice","0.5 oz strawberry syrup","1 egg white (optional)","Aromatic bitters + edible flower garnish"],glass:"Coupe"},
+  {spirit:"Tequila",name:"Elderflower Margarita",ingredients:["Tequila blanco","Elderflower liqueur","Lime","Agave syrup"],recipe:["2 oz tequila blanco","0.75 oz elderflower liqueur","1 oz lime juice","0.25 oz agave syrup"],glass:"Rocks glass"},
+  {spirit:"Tequila",name:"Cleats Up",ingredients:["Reposado tequila","Agave syrup","Lime","Cinnamon","Allspice dram","Cilantro (optional)","Caramelized pineapple"],recipe:["2 oz reposado tequila","0.75 oz agave syrup","0.75 oz lime juice","Pinch of cinnamon","Dash of allspice dram (or Angostura)","6–8 cilantro leaves, muddled (optional)","Caramelized pineapple slice to garnish"],glass:"Rocks glass"},
+  {spirit:"Fall",name:"Maple Pecan Espresso Martini",ingredients:["Vodka","Amaretto","Coffee liqueur","Maple pecan syrup","Espresso or cold brew"],recipe:["1.5 oz vodka","0.25 oz amaretto","0.75 oz coffee liqueur","0.75 oz maple pecan syrup","1 oz espresso or cold brew"],glass:"Coupe"},
+  {spirit:"Fall",name:"Brown Butter Amaretto Sour",ingredients:["Brown butter–infused bourbon","Amaretto","Cinnamon syrup","Lemon","Egg white"],recipe:["1 oz brown butter–infused bourbon","1.5 oz amaretto","1 oz cinnamon syrup","1 oz lemon juice","1 egg white"],glass:"Rocks glass"},
+];
+
+const spiritOrder=["Fall","Tequila","Bourbon","Scotch","Gin","Pisco","Vodka","Champagne"];
+const spiritIcons={Tequila:"🌵",Bourbon:"🥃",Scotch:"🏴",Gin:"🌿",Pisco:"🍇",Vodka:"❄️",Champagne:"🥂",Fall:"🍂"};
+const glassIcons={"Coupe":"🍸","Rocks glass":"🥃","Highball":"🥤","Champagne flute":"🥂","Wine glass":"🍷"};
+
+const ingredientMap={
+  "Reposado tequila":"Tequila","Tequila blanco":"Tequila","Grapefruit":"Grapefruit juice","Ruby red grapefruit juice":"Grapefruit juice",
+  "Salt solution":"Salt","Cilantro (optional)":"Cilantro","Caramelized pineapple":"Pineapple","Pineapple juice":"Pineapple",
+  "Aromatic bitters":"Angostura bitters","Cinnamon":"Cinnamon syrup",
+  "Tequila (sub Vodka)":"Tequila","Tequila (sub Mezcal)":"Tequila","Tequila (Codigo)":"Tequila","Tequila blanco":"Tequila",
+  "Bourbon (Maker's Mark)":"Bourbon","Simple syrup (optional)":"Simple syrup","Egg white (optional)":"Egg white",
+  "Cointreau (sub Grand Marnier)":"Cointreau","Lemon":"Lemon / Lime","Lime":"Lemon / Lime","Lemon twist":"Lemon / Lime","Lime (sub lemon)":"Lemon / Lime",
+  "Fresh espresso":"Espresso","Coffee liqueur (Mr Black)":"Coffee liqueur","Coffee liqueur (Kahlúa or Mr Black)":"Coffee liqueur",
+  "Pinch of salt":"Salt","Pomegranate juice":"Pomegranate / cranberry juice","Pom/cranberry juice":"Pomegranate / cranberry juice","Cranberry juice":"Pomegranate / cranberry juice",
+  "Champagne (sub Rosé)":"Champagne / Sparkling Rosé","Sparkling Rosé (Josh)":"Champagne / Sparkling Rosé",
+  "Mezcal (espadín)":"Mezcal","Muddled jalapeño (optional)":"Jalapeño","Muddled strawberries":"Strawberries","Chambord (optional)":"Chambord",
+  "Peach purée or nectar":"Peach purée","Honey ginger syrup":"Honey / Honey syrups","Honey syrup":"Honey / Honey syrups","Honey":"Honey / Honey syrups",
+  "Blended Scotch":"Scotch","Single malt Scotch":"Scotch","Pomegranate seeds":"Pomegranate seeds",
+};
+function canonical(i){return ingredientMap[i]||i;}
+const allIngredients=[...new Set(drinks.flatMap(d=>d.ingredients.map(canonical)))].sort();
+
+const STATUS={IN:"in",LOW:"low",OUT:"out"};
+const statusCfg={
+  in:{label:"In Stock",color:"#4caf50",bg:"#1a2e1a",border:"#4caf5033"},
+  low:{label:"Running Low",color:"#c49a4a",bg:"#2a1a08",border:"#c49a4a33"},
+  out:{label:"Out",color:"#c04040",bg:"#2a0e0e",border:"#c0404033"},
+};
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let state = {
+  showHidden: false,
+  hiddenTab: "recipes",
+  tapCount: 0,
+  openRecipe: null,
+  recipeSearch: "",
+  inventory: Object.fromEntries(allIngredients.map(i=>[i,STATUS.IN])),
+  invSearch: "",
+  invLoaded: false,
+  savedFlash: false,
+  qrGenerated: false,
+};
+
+function setState(patch){Object.assign(state,patch);render();}
+
+// ─── Storage ─────────────────────────────────────────────────────────────────
+async function loadInventory(){
+  try{
+    const raw=localStorage.getItem("stevens-inventory");
+    if(raw){const saved=JSON.parse(raw);setState({inventory:{...state.inventory,...saved}});}
+  }catch(e){}
+  setState({invLoaded:true});
+}
+function saveInventory(){
+  try{localStorage.setItem("stevens-inventory",JSON.stringify(state.inventory));}catch(e){}
+  setState({savedFlash:true});
+  setTimeout(()=>setState({savedFlash:false}),1500);
+}
+function cycleIngredient(ing){
+  const cur=state.inventory[ing];
+  const next=cur===STATUS.IN?STATUS.LOW:cur===STATUS.LOW?STATUS.OUT:STATUS.IN;
+  state.inventory={...state.inventory,[ing]:next};
+  saveInventory();
+}
+
+// ─── Secret tap ──────────────────────────────────────────────────────────────
+function handleFooterTap(){
+  const next=state.tapCount+1;
+  if(next>=3){setState({showHidden:true,tapCount:0});}
+  else{setState({tapCount:next});setTimeout(()=>setState({tapCount:0}),2000);}
+}
+
+// ─── Render helpers ──────────────────────────────────────────────────────────
+function el(tag,attrs,...children){
+  const e=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="style"&&typeof v==="object")Object.assign(e.style,v);
+    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
+  });
+  children.flat(Infinity).forEach(c=>{
+    if(c==null||c===false)return;
+    e.appendChild(typeof c==="string"?document.createTextNode(c):c);
+  });
+  return e;
+}
+function div(s,...c){return el("div",{style:s},...c);}
+function span(s,...c){return el("span",{style:s},...c);}
+function txt(t){return document.createTextNode(t);}
+
+// ─── Menu Tab ────────────────────────────────────────────────────────────────
+function renderMenu(){
+  const grouped=spiritOrder.reduce((acc,spirit)=>{
+    const m=drinks.filter(d=>d.spirit===spirit);
+    if(m.length)acc[spirit]=m;return acc;
+  },{});
+  const sections=Object.entries(grouped).map(([spirit,sdrinks],gi)=>{
+    const header=div({display:"flex",alignItems:"center",gap:"14px",marginBottom:"28px",marginTop:gi===0?"0":"8px"},
+      div({flex:1,height:"1px",background:"linear-gradient(to right, transparent, #4a3018)"}),
+      div({textAlign:"center"},
+        span({fontSize:"1.1rem",marginRight:"8px"},spiritIcons[spirit]),
+        span({fontFamily:"Georgia,serif",fontSize:"clamp(0.65rem,1.8vw,0.75rem)",letterSpacing:"0.35em",color:"#c49a4a",textTransform:"uppercase"},spirit),
+        span({fontSize:"1.1rem",marginLeft:"8px"},spiritIcons[spirit])
+      ),
+      div({flex:1,height:"1px",background:"linear-gradient(to left, transparent, #4a3018)"})
+    );
+    const items=sdrinks.map((drink,i)=>div({padding:"20px 4px",borderBottom:i<sdrinks.length-1?"1px solid #2e1e08":"none"},
+      div({fontFamily:"Georgia,serif",fontSize:"clamp(1.05rem,3vw,1.25rem)",color:"#f0e6cc",marginBottom:"8px",fontStyle:"italic"},drink.name),
+      div({fontSize:"clamp(0.72rem,2vw,0.82rem)",color:"#9a8060",lineHeight:1.7,letterSpacing:"0.02em"},drink.ingredients.join("  ·  "))
+    ));
+    return div({marginBottom:"48px"},header,...items);
+  });
+
+  const footerLine=div({display:"flex",alignItems:"center",gap:"12px",maxWidth:"300px",margin:"0 auto 16px",cursor:"default",userSelect:"none"},
+    div({flex:1,height:"1px",background:"linear-gradient(to right, transparent, #a07840)"}),
+    span({color:"#a07840",fontSize:"0.8rem"},"✦"),
+    div({flex:1,height:"1px",background:"linear-gradient(to left, transparent, #a07840)"})
+  );
+  footerLine.addEventListener("click",handleFooterTap);
+
+  return div({},
+    div({maxWidth:"680px",margin:"0 auto",padding:"0 20px"},...sections),
+    div({textAlign:"center",marginTop:"20px",padding:"0 24px"},footerLine)
+  );
+}
+
+// ─── Recipes Tab ─────────────────────────────────────────────────────────────
+function renderRecipes(){
+  const search=state.recipeSearch;
+  const filtered=drinks.filter(d=>d.name.toLowerCase().includes(search.toLowerCase())||d.spirit.toLowerCase().includes(search.toLowerCase()));
+
+  const searchBox=el("input",{type:"text",placeholder:"Search cocktails...",value:search,
+    style:{width:"100%",background:"#120c04",border:"1px solid #3a2510",borderRadius:"8px",padding:"11px 14px 11px 38px",color:"#e8dcc8",fontSize:"0.9rem",outline:"none"},
+    onInput:e=>setState({recipeSearch:e.target.value})
+  });
+  const searchWrap=div({position:"relative",marginBottom:"24px"},
+    span({position:"absolute",left:"14px",top:"50%",transform:"translateY(-50%)",color:"#6a4e28",fontSize:"0.9rem"},"🔍"),
+    searchBox
+  );
+
+  const cards=filtered.map(drink=>{
+    const isOpen=state.openRecipe===drink.name;
+    const card=div({background:isOpen?"#1e1208":"#120c04",border:`1px solid ${isOpen?"#6a4020":"#2a1a08"}`,borderRadius:"10px",padding:"16px 18px",cursor:"pointer",transition:"all 0.2s",userSelect:"none"});
+    const header=div({display:"flex",alignItems:"center",gap:"10px"},
+      span({fontSize:"1rem"},spiritIcons[drink.spirit]),
+      div({flex:1},
+        div({fontStyle:"italic",fontSize:"1rem",color:"#f0e6cc"},drink.name),
+        div({fontSize:"0.65rem",letterSpacing:"0.2em",color:"#6a4e28",textTransform:"uppercase",marginTop:"2px"},drink.spirit)
+      ),
+      div({display:"flex",alignItems:"center",gap:"6px"},
+        span({fontSize:"0.9rem"},glassIcons[drink.glass]||"🍹"),
+        span({fontSize:"0.65rem",color:"#6a4e28"},drink.glass)
+      ),
+      span({color:"#4a3018",fontSize:"0.65rem",marginLeft:"6px",display:"inline-block",transition:"transform 0.2s",transform:isOpen?"rotate(180deg)":"none"},"▼")
+    );
+    card.appendChild(header);
+    if(isOpen){
+      const body=div({marginTop:"16px",paddingTop:"16px",borderTop:"1px solid #2e1e08"},
+        div({fontSize:"0.62rem",letterSpacing:"0.25em",color:"#c49a4a",textTransform:"uppercase",marginBottom:"10px"},"Recipe"),
+        ...drink.recipe.map(r=>div({display:"flex",alignItems:"flex-start",gap:"10px",marginBottom:"4px"},
+          span({color:"#c49a4a",flexShrink:0,fontSize:"0.7rem"},"✦"),
+          span({fontSize:"0.88rem",color:"#c8b090",lineHeight:1.5},r)
+        )),
+        div({marginTop:"14px",display:"flex",alignItems:"center",gap:"8px"},
+          span({fontSize:"1rem"},glassIcons[drink.glass]||"🍹"),
+          span({fontSize:"0.78rem",color:"#7a5c30",fontStyle:"italic"},`Serve in a ${drink.glass.toLowerCase()}`)
+        )
+      );
+      card.appendChild(body);
+    }
+    card.addEventListener("click",()=>setState({openRecipe:isOpen?null:drink.name}));
+    return card;
+  });
+
+  return div({maxWidth:"680px",margin:"0 auto",padding:"0 20px"},searchWrap,...cards);
+}
+
+// ─── Inventory Tab ───────────────────────────────────────────────────────────
+function renderInventory(){
+  const inv=state.inventory;
+  const outCount=allIngredients.filter(i=>inv[i]===STATUS.OUT).length;
+  const lowCount=allIngredients.filter(i=>inv[i]===STATUS.LOW).length;
+  const cocktailStatus=drinks.map(drink=>{
+    const missing=[...new Set(drink.ingredients.map(canonical))].filter(i=>inv[i]===STATUS.OUT);
+    const low=[...new Set(drink.ingredients.map(canonical))].filter(i=>inv[i]===STATUS.LOW);
+    return{...drink,missing,low,canMake:missing.length===0};
+  });
+  const cantCount=cocktailStatus.filter(c=>!c.canMake).length;
+  const search=state.invSearch;
+  const filtered=allIngredients.filter(i=>i.toLowerCase().includes(search.toLowerCase()));
+
+  const summaryCards=[
+    {label:"Out",count:outCount,color:"#c04040"},
+    {label:"Low",count:lowCount,color:"#c49a4a"},
+    {label:"Can't make",count:cantCount,color:"#7a5c30"},
+  ].map(({label,count,color})=>div({flex:1,minWidth:"80px",background:"#120c04",border:"1px solid #2a1a08",borderRadius:"10px",padding:"10px 12px",textAlign:"center"},
+    div({fontSize:"1.4rem",color,fontWeight:600},String(count)),
+    div({fontSize:"0.6rem",letterSpacing:"0.1em",color:"#6a4e28",textTransform:"uppercase",marginTop:"2px"},label)
+  ));
+
+  const savedEl=div({height:"18px",marginBottom:"8px",textAlign:"right"},
+    state.savedFlash?span({fontSize:"0.7rem",color:"#4caf50",fontStyle:"italic"},"✓ Saved"):txt("")
+  );
+
+  const searchInput=el("input",{type:"text",placeholder:"Search ingredients...",value:search,
+    style:{width:"100%",background:"#120c04",border:"1px solid #2a1a08",borderRadius:"8px",padding:"9px 12px 9px 34px",color:"#e8dcc8",fontSize:"0.85rem",outline:"none"},
+    onInput:e=>setState({invSearch:e.target.value})
+  });
+
+  const ingRows=filtered.map(ing=>{
+    const cfg=statusCfg[inv[ing]];
+    const row=div({display:"flex",alignItems:"center",gap:"12px",background:cfg.bg,border:`1px solid ${cfg.border}`,borderRadius:"8px",padding:"11px 14px",cursor:"pointer",transition:"all 0.2s",userSelect:"none",marginBottom:"6px"},
+      div({width:"7px",height:"7px",borderRadius:"50%",background:cfg.color,boxShadow:`0 0 5px ${cfg.color}`,flexShrink:0}),
+      span({flex:1,fontSize:"0.9rem",color:"#e8dcc8"},ing),
+      span({fontSize:"0.62rem",letterSpacing:"0.08em",color:cfg.color,textTransform:"uppercase"},cfg.label)
+    );
+    row.addEventListener("click",()=>cycleIngredient(ing));
+    return row;
+  });
+
+  const cocktailRows=cocktailStatus.map(drink=>{
+    const bg=!drink.canMake?"#1a0808":drink.low.length>0?"#1a1204":"#120c04";
+    const border=!drink.canMake?"#c0404033":drink.low.length>0?"#c49a4a33":"#2a1a08";
+    const dotColor=!drink.canMake?"#c04040":drink.low.length>0?"#c49a4a":"#4caf50";
+    const children=[
+      div({display:"flex",alignItems:"center",gap:"10px"},
+        div({width:"7px",height:"7px",borderRadius:"50%",background:dotColor,boxShadow:`0 0 5px ${dotColor}`,flexShrink:0}),
+        span({flex:1,fontStyle:"italic",fontSize:"0.92rem",color:"#e8dcc8"},drink.name),
+        !drink.canMake?span({fontSize:"0.6rem",color:"#c04040",textTransform:"uppercase",letterSpacing:"0.08em"},"Can't make"):
+        drink.low.length>0?span({fontSize:"0.6rem",color:"#c49a4a",textTransform:"uppercase",letterSpacing:"0.08em"},"Low stock"):txt("")
+      ),
+    ];
+    if(drink.missing.length>0)children.push(div({marginTop:"8px",marginLeft:"17px"},...drink.missing.map(i=>div({fontSize:"0.75rem",color:"#c04040",marginBottom:"2px"},`· ${i}`))));
+    if(drink.low.length>0)children.push(div({marginTop:"6px",marginLeft:"17px"},...drink.low.map(i=>div({fontSize:"0.75rem",color:"#c49a4a",marginBottom:"2px"},`· ${i}`))));
+    return div({background:bg,border:`1px solid ${border}`,borderRadius:"8px",padding:"12px 14px",marginBottom:"8px"},...children);
+  });
+
+  return div({maxWidth:"680px",margin:"0 auto",padding:"0 20px"},
+    div({display:"flex",gap:"8px",marginBottom:"20px",flexWrap:"wrap"},...summaryCards),
+    savedEl,
+    div({position:"relative",marginBottom:"16px"},
+      span({position:"absolute",left:"12px",top:"50%",transform:"translateY(-50%)",color:"#6a4e28",fontSize:"0.85rem"},"🔍"),
+      searchInput
+    ),
+    div({fontSize:"0.6rem",letterSpacing:"0.15em",color:"#4a3018",textTransform:"uppercase",marginBottom:"12px",fontStyle:"italic"},"Tap to cycle: In Stock → Low → Out"),
+    div({},...ingRows),
+    div({fontSize:"0.62rem",letterSpacing:"0.25em",color:"#c49a4a",textTransform:"uppercase",marginBottom:"14px",marginTop:"8px"},"Cocktail Status"),
+    div({},...cocktailRows)
+  );
+}
+
+// ─── QR Tab ──────────────────────────────────────────────────────────────────
+function renderQR(){
+  const urlInput=el("input",{type:"text",placeholder:"https://stayatstevens.netlify.app",
+    style:{width:"100%",background:"#120c04",border:"1px solid #3a2510",borderRadius:"8px",padding:"10px 14px",color:"#e8dcc8",fontSize:"0.85rem",outline:"none",marginBottom:"12px"}
+  });
+  const qrBox=div({background:"#fff",padding:"16px",borderRadius:"12px",display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:"180px",minHeight:"180px"});
+  const qrLabel=div({fontSize:"0.6rem",letterSpacing:"0.15em",color:"#6a4e28",textTransform:"uppercase",textAlign:"center",marginTop:"12px"},"Scan to open the menu");
+  const downloadBtn=el("a",{download:"stay-at-stevens-qr.png",style:{display:"none",marginTop:"12px",padding:"8px 20px",borderRadius:"20px",border:"1px solid #c49a4a",background:"transparent",color:"#c49a4a",fontSize:"0.7rem",letterSpacing:"0.1em",textTransform:"uppercase",textDecoration:"none",textAlign:"center",cursor:"pointer"}},"⬇ Download QR");
+
+  const genBtn=el("button",{style:{width:"100%",padding:"10px",borderRadius:"8px",border:"1px solid #c49a4a",background:"#2a1a08",color:"#c49a4a",fontSize:"0.75rem",letterSpacing:"0.1em",textTransform:"uppercase",cursor:"pointer"}},
+    "Generate QR Code"
+  );
+  genBtn.addEventListener("click",()=>{
+    const url=urlInput.value.trim();
+    if(!url)return;
+    qrBox.innerHTML="";
+    new QRCode(qrBox,{text:url,width:200,height:200,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+    setTimeout(()=>{
+      const canvas=qrBox.querySelector("canvas");
+      if(canvas){downloadBtn.href=canvas.toDataURL("image/png");downloadBtn.style.display="block";}
+    },200);
+  });
+  urlInput.addEventListener("keydown",e=>{if(e.key==="Enter")genBtn.click();});
+
+  return div({maxWidth:"680px",margin:"0 auto",padding:"0 20px"},
+    div({fontSize:"0.62rem",letterSpacing:"0.25em",color:"#c49a4a",textTransform:"uppercase",marginBottom:"14px"},"QR Code Generator"),
+    div({fontSize:"0.8rem",color:"#7a5c30",fontStyle:"italic",marginBottom:"16px",lineHeight:1.6},
+      "1. Deploy index.html to Netlify\n2. Paste your URL below\n3. Download and print the QR code"
+    ),
+    urlInput,
+    genBtn,
+    div({textAlign:"center",marginTop:"20px"},qrBox,qrLabel,downloadBtn)
+  );
+}
+
+// ─── Main render ─────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML="";
+
+  // Noise texture
+  const noise=div({position:"fixed",inset:0,pointerEvents:"none",zIndex:0,opacity:0.6,backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`});
+
+  // Header
+  const header=div({textAlign:"center",padding:"48px 24px 32px"},
+    div({color:"#a07840",fontSize:"1.1rem",letterSpacing:"0.5em",marginBottom:"14px",opacity:0.7},"✦ ✦ ✦"),
+    div({fontSize:"clamp(0.7rem,2vw,0.85rem)",letterSpacing:"0.45em",color:"#a07840",textTransform:"uppercase",marginBottom:"10px"},"Stay at"),
+    el("h1",{style:{margin:"0 0 6px",fontSize:"clamp(3rem,10vw,5rem)",fontWeight:400,color:"#f0e6cc",letterSpacing:"0.05em",lineHeight:1,textShadow:"0 2px 20px rgba(160,120,64,0.3)"}},"Stevens"),
+    div({marginBottom:"24px"}),
+    div({display:"flex",alignItems:"center",gap:"12px",maxWidth:"300px",margin:"0 auto"},
+      div({flex:1,height:"1px",background:"linear-gradient(to right, transparent, #a07840)"}),
+      span({color:"#a07840",fontSize:"0.8rem"},"✦"),
+      div({flex:1,height:"1px",background:"linear-gradient(to left, transparent, #a07840)"})
+    )
+  );
+
+  const main=div({position:"relative",zIndex:1},header,div({paddingTop:"8px"},renderMenu()));
+  app.appendChild(noise);
+  app.appendChild(main);
+
+  // Hidden overlay
+  if(state.showHidden){
+    const overlay=div({position:"fixed",inset:0,zIndex:100,background:"#0e0804",overflowY:"auto",animation:"slideUp 0.35s ease"});
+
+    // Tab buttons
+    const tabs=[["recipes","Bartender's Guide"],["inventory","Inventory"],["qr","QR Code"]];
+    const tabBtns=tabs.map(([key,label])=>{
+      const active=state.hiddenTab===key;
+      const btn=el("button",{style:{flex:1,padding:"6px 8px",borderRadius:"16px",border:"none",background:active?"#c49a4a":"transparent",color:active?"#1a1008":"#7a5c30",fontSize:"0.72rem",fontWeight:active?"600":"400",cursor:"pointer",transition:"all 0.2s"}},label);
+      btn.addEventListener("click",()=>setState({hiddenTab:key}));
+      return btn;
+    });
+    const tabBar=div({display:"inline-flex",background:"#1a1008",border:"1px solid #2e1e08",borderRadius:"20px",padding:"3px",gap:"3px",flex:1},...tabBtns);
+
+    const closeBtn=el("button",{style:{background:"none",border:"1px solid #3a2510",borderRadius:"20px",color:"#7a5c30",padding:"5px 14px",fontSize:"0.75rem",flexShrink:0,cursor:"pointer"}},"Close");
+    closeBtn.addEventListener("click",()=>setState({showHidden:false}));
+
+    const topBar=div({position:"sticky",top:0,zIndex:10,background:"#0e0804",borderBottom:"1px solid #2e1e08",padding:"12px 20px",display:"flex",alignItems:"center",gap:"12px"},tabBar,closeBtn);
+
+    let content;
+    if(state.hiddenTab==="recipes")content=renderRecipes();
+    else if(state.hiddenTab==="inventory")content=renderInventory();
+    else content=renderQR();
+
+    overlay.appendChild(topBar);
+    overlay.appendChild(div({padding:"20px 0 60px"},content));
+    app.appendChild(overlay);
+  }
+}
+
+loadInventory().then(render);
+</script>
+</body>
+</html>
